@@ -405,7 +405,7 @@ class StreamableHTTPTransport:
                             else:
                                 await self._handle_post_request(ctx)
                         except Exception as e:
-                            # Send error to read stream so client knows request failed
+                            # Send error response so client knows request failed
                             logger.error("Request handler error: %s", e)
                             await ctx.read_stream_writer.send(e)
 
