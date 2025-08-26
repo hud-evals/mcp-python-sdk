@@ -1,5 +1,5 @@
 [project]
-name = "hud-mcp-python-sdk"
+name = "mcp"
 version = "1.13.1"
 description = "Model Context Protocol SDK"
 readme = "README.md"
