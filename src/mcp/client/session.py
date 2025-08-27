@@ -129,7 +129,7 @@ class ClientSession(
         logging_callback: LoggingFnT | None = None,
         message_handler: MessageHandlerFnT | None = None,
         client_info: types.Implementation | None = None,
-        validation_options: ValidationOptions | None = None,
+        validate_structured_outputs: bool = True,
     ) -> None:
         super().__init__(
             read_stream,
@@ -145,7 +145,7 @@ class ClientSession(
         self._logging_callback = logging_callback or _default_logging_callback
         self._message_handler = message_handler or _default_message_handler
         self._tool_output_schemas: dict[str, dict[str, Any] | None] = {}
-        self._validation_options = validation_options or ValidationOptions()
+        self._validate_structured_outputs = validate_structured_outputs
 
     async def initialize(self) -> types.InitializeResult:
         sampling = types.SamplingCapability() if self._sampling_callback is not _default_sampling_callback else None
@@ -337,27 +337,26 @@ class ClientSession(
 
         if output_schema is not None:
             if result.structuredContent is None:
-                if self._validation_options.strict_output_validation:
+                if self._validate_structured_outputs:
                     raise RuntimeError(f"Tool {name} has an output schema but did not return structured content")
                 else:
                     logger.warning(
                         f"Tool {name} has an output schema but did not return structured content. "
-                        f"Continuing without structured content validation due to lenient validation mode."
+                        f"Continuing without structured content validation."
                     )
             else:
                 try:
                     validate(result.structuredContent, output_schema)
                 except ValidationError as e:
-                    if self._validation_options.strict_output_validation:
-                        raise RuntimeError(f"Invalid structured content returned by tool {name}: {e}")
+                    if self._validate_structured_outputs:
+                        raise RuntimeError(f"Invalid structured content returned by tool {name}: {e}") from e
                     else:
                         logger.warning(
-                            f"Invalid structured content returned by tool {name}: {e}. "
-                            f"Continuing due to lenient validation mode."
+                            f"Invalid structured content returned by tool {name}: {e}. Continuing without validation."
                         )
                 except SchemaError as e:
                     # Schema errors are always raised - they indicate a problem with the schema itself
-                    raise RuntimeError(f"Invalid schema for tool {name}: {e}")
+                    raise RuntimeError(f"Invalid schema for tool {name}: {e}") from e
 
     async def list_prompts(self, cursor: str | None = None) -> types.ListPromptsResult:
         """Send a prompts/list request."""
