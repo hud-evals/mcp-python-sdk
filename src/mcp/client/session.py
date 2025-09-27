@@ -20,12 +20,12 @@ logger = logging.getLogger("client")
 
 class ValidationOptions(BaseModel):
     """Options for controlling validation behavior in MCP client sessions."""
-    
+
     strict_output_validation: bool = Field(
         default=True,
         description="Whether to raise exceptions when tools don't return structured "
         "content as specified by their output schema. When False, validation "
-        "errors are logged as warnings and execution continues."
+        "errors are logged as warnings and execution continues.",
     )
 
 

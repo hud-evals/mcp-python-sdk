@@ -171,7 +171,7 @@ class Server(Generic[LifespanResultT, RequestT]):
 
         return InitializationOptions(
             server_name=self.name,
-            server_version=self.version if self.version else pkg_version("mcp"),
+            server_version=self.version if self.version else pkg_version("hud-mcp-python-sdk"),
             capabilities=self.get_capabilities(
                 notification_options or NotificationOptions(),
                 experimental_capabilities or {},
